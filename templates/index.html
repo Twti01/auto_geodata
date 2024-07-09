@@ -2,20 +2,111 @@
 {% block head %}
 {% endblock %}
 {% block body %}
-
-<div class="content">
+<div class="header">
   <h1>Activate Sensors</h1>
-  <a href="http://192.168.178.118:8000/buzzer">
-    <button>Buzzer</button>
+</div>
+<div class="content">
+  <a href="http://192.168.178.118:8000/buzzer"> 
+    <button class="buzzer">Buzzer</button>
   </a>
   <a href="http://192.168.178.118:8000/vibration">
-    <button>Vibration</button>
+    <button class="vibration">Vibration</button>
   </a>
   <a href="http://192.168.178.118:8000/dht">
-    <button>dht</button>
+    <button class="dht">dht</button>
   </a>
   <a href="http://192.168.178.118:8000/lcd">
-    <button>lcd</button>
+    <button class="lcd">lcd</button>
   </a>
+  <a href="http://192.168.178.118:8000/nightsens">
+    <button class="nightsens">nightsensor</button>
+  </a>
+  <style>
+    .content {
+      display: grid;
+    }
+    .header {
+      background-color: lightgreen;
+      border-color: blue;
+      border-radius: 2px;
+    }
+    .buzzer {
+      float: left;
+      background-color: aqua;
+      height: 50px;
+      width: 150px;
+      color: blue;
+      border: none;
+      font-size: 36px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+    .buzzer:hover {
+      background-color: lightgreen;
+      transition: 0.7s;
+      box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+    }
+    .vibration {
+      background-color: greenyellow;
+      margin-top: 20px;
+      height: 50px;
+      width: 150px;
+      color: green;
+      border: none;
+      font-size: 34px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+    .vibration:hover {
+      background-color: gold;
+      box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+      transition: 0.7s;}
+    .dht {
+      background-color: red;
+      margin-top: 20px;
+      height: 50px;
+      width: 150px;
+      color: white;
+      border: none;
+      font-size: 36px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+    .dht:hover {
+      background-color: lightcoral;
+      box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+      transition: 0.7s;}
+    .lcd {
+      background-color: white;
+      margin-top: 20px;
+      height: 50px;
+      width: 150px;
+      color: blue;
+      border-color: blue;
+      font-size: 36px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+    .lcd:hover {
+      background-color: aqua;
+      box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+      transition: 0.7s;}
+    .nightsens {
+      background-color: black;
+      margin-top: 20px;
+      height: 50px;
+      width: 150px;
+      color: gainsboro;
+      border: none;
+      font-size: 26px;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+    .nightsens:hover {
+      opacity: 0.3;
+      box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+      transition: 0.7s;}
+
+  </style>
 </div>
 {% endblock %}
