@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for, request, redirect
+from flask import Flask, redirect, render_template, request, url_for, request, jsonify
 import RPi.GPIO as GPIO
 import time
 import dht11
@@ -7,10 +7,11 @@ import busio
 import adafruit_character_lcd.character_lcd_i2c as character_lcd 
 import sqlite3
 from light_sensor import LightSensor
+import requests
 
 app = Flask(__name__)
 
-act_pins = (18, 26, 24)
+act_pins = (18, 26, 24, 27)
 other_pins = (13, 5, 18)
 
 def execute(sql):
@@ -38,6 +39,18 @@ def setupGPIO_board(index):
     GPIO.setwarnings(False)
     GPIO.setup(other_pins[index], GPIO.OUT)
 
+
+def get_location():
+    ip_address = '172.16.235.128'
+    response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+    location_data = {
+        "ip": ip_address,
+        "city": response.get("city"),
+        "region": response.get("region"),
+        "country": response.get("country_name")
+    }
+    return location_data
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -58,16 +71,16 @@ def dht():
         result = instance.read()
         while not result.is_valid():  # read until valid values
             result = instance.read()
-            temp = result.temperature
-            humid = result.humidity
-    return render_template('index.html')
+        temp = result.temperature
+        humid = result.humidity
+        return render_template('index.html')
 
 @app.route('/vibration')
 def vibration():
-    setupGPIO_board(0)
-    GPIO.output(other_pins[0], GPIO.HIGH)
+    setupGPIO_out(3)
+    GPIO.output(act_pins[3], GPIO.HIGH)
     time.sleep(1)
-    GPIO.output(other_pins[0], GPIO.LOW)
+    GPIO.output(act_pins[3], GPIO.LOW)
     GPIO.cleanup()
     return render_template('index.html')
 
@@ -131,8 +144,14 @@ def nightsens():
 @app.route('/nightsens', methods=['GET'])
 def show_table():
     result = execute("SELECT * FROM sleep_noises")
-    return render_template('nightsens.html')
+    return render_template('nightsens.html', data=result)
+
+
+@app.route('/map')
+def map():
+    print(get_location())
+    return render_template('map.html')
 
 if __name__ == '__main__':
-    app.run(host="192.168.178.118", port=8000, debug=True)
+    app.run(host="172.16.235.128", port=8000, debug=True)
     GPIO.cleanup()

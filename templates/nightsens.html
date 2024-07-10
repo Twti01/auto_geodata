@@ -4,18 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noises in sleep</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
         title {color: white;}
+        #map { 
+            height: 400px;
+            width: 50%;}
     </style>
 </head>
 <body style="background-color: black;">
     <h1>Ready to observe your sleep?</h1>
-    <a href="http://192.168.178.118:8000" class="home">
+    <div id="content">
+        <a href="http://172.16.235.128:8000" class="home">
         <button>Back to Home</button>
     </a>
     <img src="../images/begin-2398766_1280.png">
    <style>
     h1 {color: white;}
    </style>
+   </div>
+   <div id="map"></div>
+   <script>async function getLocation() {
+            const response = await fetch('/table');
+            const data = await response.json();
+            return data;
+        }
+
+        async function initMap() {
+            const location = await getLocation();
+
+            var map = L.map('map').setView([location.latitude, location.longitude], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            L.marker([location.latitude, location.longitude]).addTo(map)
+                .bindPopup('You are here.')
+                .openPopup();
+        }
+
+        initMap();
+        </script>
 </body>
 </html>
