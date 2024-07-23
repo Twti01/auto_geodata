@@ -1,0 +1,10 @@
+--2024-06-12 17:23:57--  http://127.0.0.1:8086/query?db=db_damm&q=select%20*%20from%20env
+Connecting to 127.0.0.1:8086... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [application/json]
+Saving to: 'query?db=db_damm&q=select * from env.1'
+
+     0K ..                                                      984K=0.002s
+
+2024-06-12 17:23:57 (984 KB/s) - 'query?db=db_damm&q=select * from env.1' saved [2259]
+
