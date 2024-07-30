@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, abort
 import influxdb, secrets, requests
+from api-key import key_list
 
 app = Flask(__name__)
 
@@ -12,14 +13,7 @@ database = "db_damm"
 client = influxdb.InfluxDBClient(host=host, port=port, username=user, password=password)
 client.switch_database(database)
 
-def gen_api_keys(number, key_len=16):
-    keys = []
-    for i in range(number):
-        key = secrets.token_hex(key_len)  
-        keys.append(key)
-    return keys
-
-keys_list = gen_api_keys(15)
+keys_list = key_list()
 
 def require_api_key(view_function):
     def decorated_function(*args, **kwargs):

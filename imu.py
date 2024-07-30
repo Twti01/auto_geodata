@@ -36,9 +36,9 @@ kf_gyro_z = KalmanFilter()
 
 # Callback-Funktion für Beschleunigungsdaten
 def cb_acceleration(x, y, z):
-    filtered_x = kf_acc_x.update(x / 1000.0)
-    filtered_y = kf_acc_y.update(y / 1000.0)
-    filtered_z = kf_acc_z.update(z / 1000.0)
+    filtered_x = kf_acc_x.update(x / 100)
+    filtered_y = kf_acc_y.update(y / 100)
+    filtered_z = kf_acc_z.update(z / 100)
     print("Gefilterte Beschleunigung: x = {:.2f} m/s², y = {:.2f} m/s², z = {:.2f} m/s²".format(filtered_x, filtered_y, filtered_z))
 
 # Callback-Funktion für Winkelgeschwindigkeitsdaten

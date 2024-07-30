@@ -90,9 +90,9 @@ kf_gyro_z = KalmanFilter()
 # Callback function for IMU data
 def cb_acceleration(x, y, z):
     global acceleration_x, acceleration_y, acceleration_z
-    acceleration_x = round(kf_acc_x.update(x / 1000.0), 4)  # Convert to m/s²
-    acceleration_y = round(kf_acc_y.update(y / 1000.0), 4)
-    acceleration_z = round(kf_acc_z.update(z / 1000.0), 4)
+    acceleration_x = round(kf_acc_x.update(x / 100.0), 4)  # Convert to m/s²
+    acceleration_y = round(kf_acc_y.update(y / 100.0), 4)
+    acceleration_z = round(kf_acc_z.update(z / 100.0), 4)
 
 def cb_angular_velocity(x, y, z):
     global angular_velocity_x, angular_velocity_y, angular_velocity_z
