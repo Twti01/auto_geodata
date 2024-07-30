@@ -11,11 +11,13 @@ from light_sensor import LightSensor
 
 random_name = "".join(random.choices(string.ascii_letters + string.digits, k=10))
 client = mqtt.Client(client_id=random_name , clean_session=True)
+
+#Variable auf Lichtsensor 
 sensor = LightSensor()
 
+#DHT-11 Pin zuweisen
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-
 # read data using pin 4
 instance = dht11.DHT11(pin = 4)
 
@@ -39,18 +41,9 @@ def on_connect(client, userdata, flags, rc):
 def on_disconnect(client, userdata, rc):
     print(f"disconnected from server with result code: {rc}")
 
-#dummy data worker
-'''def worker(client, interval):
-    while True:
-        ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
-        temp = 20.0 + random.random()
-        hum = 40.0 + random.random()
-        data = {'ts' : ts, 'temp' : temp, 'hum' : hum}    
-        client.publish("RPi/GR6/dht11", payload=json.dumps(data))
-        time.sleep(interval)'''
-
 def dht(client, interval):
     while True:
+
         light = sensor.readLight()
         ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
         result = instance.read()
@@ -59,7 +52,7 @@ def dht(client, interval):
         data = {'ts' : ts, 'temp' : result.temperature, 'hum' : result.humidity}    
         data2 = {'light': light}    
         client.publish("RPi/GR6/dht11", payload=json.dumps(data))
-        client.publish("RPi/GR6/light_sens", payload=json.dumps(data2))
+        client.publish("RPi/GR6/light", payload=json.dumps(data2))
         time.sleep(interval)
 
 

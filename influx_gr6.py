@@ -9,6 +9,11 @@ from tinkerforge.ip_connection import IPConnection
 from tinkerforge.bricklet_gps_v3 import BrickletGPSV3
 from tinkerforge.brick_imu_v2 import BrickIMUV2
 import math
+import paho.mqtt.client as mqtt
+import string
+import random
+import json
+
 
 # Kalman-Filter-Klasse
 class KalmanFilter:
@@ -79,6 +84,10 @@ angular_velocity_y = 0.0
 angular_velocity_z = 0.0
 gps_lock = threading.Lock()
 
+# Flags to check if data is valid
+gps_data_valid = False
+imu_data_valid = False
+
 # Initialize Kalman Filters for IMU data
 kf_acc_x = KalmanFilter()
 kf_acc_y = KalmanFilter()
@@ -88,24 +97,64 @@ kf_gyro_y = KalmanFilter()
 kf_gyro_z = KalmanFilter()
 
 # Callback function for IMU data
+# https://www.tinkerforge.com/de/doc/Software/Bricks/IMUV2_Brick_Python.html#imu-v2-brick-python-api
 def cb_acceleration(x, y, z):
-    global acceleration_x, acceleration_y, acceleration_z
-    acceleration_x = round(kf_acc_x.update(x / 100.0), 4)  # Convert to m/s²
+    global acceleration_x, acceleration_y, acceleration_z, imu_data_valid
+    acceleration_x = round(kf_acc_x.update(x / 100.0), 4)  # IMU-Brick Ausgabe cm/s² in m/s²
     acceleration_y = round(kf_acc_y.update(y / 100.0), 4)
     acceleration_z = round(kf_acc_z.update(z / 100.0), 4)
+    imu_data_valid = True
 
 def cb_angular_velocity(x, y, z):
-    global angular_velocity_x, angular_velocity_y, angular_velocity_z
-    angular_velocity_x = round(kf_gyro_x.update(x / 100.0), 4)  # Convert to °/s
-    angular_velocity_y = round(kf_gyro_y.update(y / 100.0), 4)
-    angular_velocity_z = round(kf_gyro_z.update(z / 100.0), 4)
+    global angular_velocity_x, angular_velocity_y, angular_velocity_z, imu_data_valid
+    angular_velocity_x = round(kf_gyro_x.update(x / 16), 4)  # konvertiere in °/s
+    angular_velocity_y = round(kf_gyro_y.update(y / 16), 4)
+    angular_velocity_z = round(kf_gyro_z.update(z / 16), 4)
+    imu_data_valid = True
 
 # Callback-Funktion für GPS-Daten
 def cb_coordinates(lat, ns, lon, ew):
-    global latitude, longitude
+    global latitude, longitude, gps_data_valid
     with gps_lock:
         latitude = round(lat / 1000000.0, 4)
         longitude = round(lon / 1000000.0, 4)
+        gps_data_valid = True
+
+
+
+
+random_name = "".join(random.choices(string.ascii_letters + string.digits, k=10))
+client = mqtt.Client(client_id=random_name , clean_session=True)
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("connection successful")
+    elif rc == 1:
+        print("connection refused - incorrect protocol version")
+    elif rc == 2:
+        print("connection refused - invalid client identifier")
+    elif rc == 3:
+        print("connection refused - server unavailable")
+    elif rc == 4:
+        print("connection refused - username or/and password incorrect")
+    elif rc == 5:
+        print("connection refused - not authorised")
+    else:
+        print(f"connection refused: {rc}")
+        
+def on_disconnect(client, userdata, rc):
+    print(f"disconnected from server with result code: {rc}")
+
+client.on_connect = on_connect 
+client.on_disconnect = on_disconnect
+
+def publish_data(topic, data):
+    client.publish(topic, json.dumps(data))
+
+client.connect("mqtt-dashboard.com", 1883)
+client.loop_start()
+
+
 
 def worker(sensor_name, sensor_type, interval):
     while True:
@@ -120,6 +169,17 @@ def worker(sensor_name, sensor_type, interval):
         temp = result.temperature
         humid = result.humidity
 
+        if not gps_data_valid:
+            # Skip writing to the database if GPS is not valid
+            time.sleep(interval)
+            continue
+
+        if not imu_data_valid:
+            # Skip writing to the database if IMU data is not valid
+            time.sleep(interval)
+            continue
+
+
         # Calculate resulting acceleration
         resulting_acceleration = math.sqrt(acceleration_x**2 + acceleration_y**2 + acceleration_z**2)
         # Calculate resulting angular velocity
@@ -129,6 +189,11 @@ def worker(sensor_name, sensor_type, interval):
         with gps_lock:
             lat = latitude
             lon = longitude
+
+        # Round values to 3 decimal places
+        temp = round(temp, 3)
+        humid = round(humid, 3)
+        light = round(light, 3)
 
         data = {
             "measurement": "umwelt",
@@ -185,6 +250,21 @@ def worker(sensor_name, sensor_type, interval):
         if not db.write_points([data3]):
             print("error write points!")
     
+       # Publish sensor data to MQTT in groups
+        client.publish("RPi/GR6/env", json.dumps({"temp": temp, "humid": humid, "light": light}))
+        client.publish("RPi/GR6/gps", json.dumps({"latitude": lat, "longitude": lon}))
+        client.publish("RPi/GR6/imu", json.dumps({
+            "acc_x": acceleration_x,
+            "acc_y": acceleration_y,
+            "acc_z": acceleration_z,
+            "resulting_acceleration": resulting_acceleration,
+            "gyro_x": angular_velocity_x,
+            "gyro_y": angular_velocity_y,
+            "gyro_z": angular_velocity_z,
+            "resulting_angular_velocity": resulting_angular_velocity
+        }))
+
+
         time.sleep(interval)
 
 

@@ -43,9 +43,9 @@ def cb_acceleration(x, y, z):
 
 # Callback-Funktion für Winkelgeschwindigkeitsdaten
 def cb_angular_velocity(x, y, z):
-    filtered_x = kf_gyro_x.update(x / 100.0)
-    filtered_y = kf_gyro_y.update(y / 100.0)
-    filtered_z = kf_gyro_z.update(z / 100.0)
+    filtered_x = kf_gyro_x.update(x /16)
+    filtered_y = kf_gyro_y.update(y /16)
+    filtered_z = kf_gyro_z.update(z /16)
     print("Gefilterte Winkelgeschwindigkeit: x = {:.2f} °/s, y = {:.2f} °/s, z = {:.2f} °/s".format(filtered_x, filtered_y, filtered_z))
 
 if __name__ == "__main__":
@@ -61,8 +61,8 @@ if __name__ == "__main__":
         imu.register_callback(imu.CALLBACK_ANGULAR_VELOCITY, cb_angular_velocity)
 
         # Setze periodische Callback-Perioden auf 1 Sekunde (1000 ms)
-        imu.set_acceleration_period(1000)
-        imu.set_angular_velocity_period(1000)
+        imu.set_acceleration_period(5000)
+        imu.set_angular_velocity_period(5000)
 
         input("Drücke eine Taste, um das Programm zu beenden\n")  # Warte auf Benutzereingabe
     except Exception as e:
