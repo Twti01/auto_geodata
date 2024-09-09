@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London Traffic Overview</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        /* Größe der Karte */
+        #map {
+            height: 90vh; /* Höhe der Karte */
+            width: 70%;   /* Breite der Karte */
+            margin: 20px 0; /* Abstände zum Rand */
+						float: left;
+        }
+				#details {
+					height: 90vh;
+					width: 30%;
+					float:right;
+					padding: 20px;
+					box-sizing: border-box;
+					background-color: #f4f4f4;
+					z-index: 1000;
+					position: relative;
+				}
+    </style>
+</head>
+<body>
+    <h1>Bikepoints Karte</h1>
+    
+    <!-- Div für die Karte -->
+    <div id="map"></div>
+
+		<div id="details">
+				<h2>Details</h2>
+				<p id="bikeName">Klicken Sie auf einen Marker, um Details anzuzeigen.</p>
+				<p id="availableBikes"></p>
+				<p id="availablestandardBikes"></p>
+				<p id="availableEBikes"></p>
+				<p id="numberofdocks"></p>
+				<p id="emptydocks"></p>
+				<p id="installDate"></p>
+				<p id="updateTime"></p>
+		</div>
+
+    <script>
+        // Korrektur der Syntax
+        const bikepoints = {{ bikepoint | tojson | safe }};
+
+				 function updateDetails(point) {
+					 console.log("Updating details for:", point);
+					// Suche nach den spezifischen Eigenschaften
+					const availableBikes = point.additionalProperties.find(p => p.key === 'NbBikes')?.value || 'Keine Angabe';
+					const availablestandardBikes = point.additionalProperties.find(p => p.key === 'NbStandardBikes')?.value || 'Keine Angabe';
+					const availableEBikes = point.additionalProperties.find(p => p.key === 'NbEBikes')?.value || 'Keine Angabe';
+					const numberofdocks = point.additionalProperties.find(p => p.key === 'NbDocks')?.value || 'Keine Angabe';
+					const emptydocks = point.additionalProperties.find(p => p.key === 'NbEmptyDocks')?.value || 'Keine Angabe';
+					const installDate = point.additionalProperties.find(p => p.key === 'InstallDate')?.value || 'Keine Angabe';
+
+					 console.log("Available Bikes:", availableBikes);
+					 console.log("Install Date:", installDate);
+					 console.log("updated Time:", point.updated_time)
+
+					// Konvertiere das Installationsdatum von Unix-Zeitstempel zu lesbarem Datum, falls notwendig
+					const installDateFormatted = installDate !== 'Keine Angabe' ? new Date(parseInt(installDate)).toLocaleDateString() : installDate;
+
+					// Aktualisiere die HTML-Elemente
+					document.getElementById('bikeName').innerText = `Name: ${point.commonName}`;
+					document.getElementById('availableBikes').innerText = `Verfügbare Fahrräder: ${availableBikes}`;
+					document.getElementById('availablestandardBikes').innerText = `Verfügbare Standardfahrräder: ${availablestandardBikes}`;
+					document.getElementById('availableEBikes').innerText = `Verfügbare Elektro-Fahrräder: ${availableEBikes}`;
+					document.getElementById('numberofdocks').innerText = `Gesamtanzahl der Andockstellen: ${numberofdocks}`;
+					document.getElementById('emptydocks').innerText = `Anzahl an freien Andockstellen: ${emptydocks}`;
+					document.getElementById('installDate').innerText = `Installationsdatum: ${installDateFormatted}`;
+					document.getElementById('updateTime').innerText = `Letzte Aktualsierung: ${point.updated_time}`;
+			}     
+        // Initialisiere die Karte
+        var map = L.map('map').setView([51.50865, -0.118092], 13); // Startposition (Breitengrad, Längengrad) und Zoom-Stufe
+
+        // Füge eine Karte von OpenStreetMap hinzu
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+				
+        // Marker für jeden Bikepoint hinzufügen
+        bikepoints.forEach(function (point) {
+            if (point.lat && point.lon) {
+							var marker = L.marker([point.lat, point.lon]).addTo(map)
+                    .bindPopup(point.commonName); // Pop-up mit dem Namen des Bikepoints
+
+							marker.on("click", function(){ updateDetails(point);
+								map.setView([point.lat, point.lon], 13);
+							});
+            }
+        });
+    </script>
+</body>
+</html>
+

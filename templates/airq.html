@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Airquality</title>
+	<style>
+	#details {
+		height: 90vh;
+		width: 100%;
+		font-size: 16px;
+		font-weight: bold;
+		background-color:#f4f4f4;
+	}
+	.forecast_container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px;
+		padding: 20px;
+	}
+	.forecast {
+		flex: 1 1 calc(50% -20px);
+		box-sizing: border-box;
+		border: 1px solid #ddd;
+		padding: 15px;
+	}
+	</style>
+</head>
+<body>
+	<h1>Airquality Forecast</h1>
+
+	<div id="details">
+	<p id="aim"></p>
+	<p id="Aktualisierungsrate"></p>
+	<p id="forecasts" class="forecast_container"></p>
+	</div>
+
+	<script>
+		const airquality = {{ airquality | tojson | safe }};
+
+		document.getElementById('aim').innerText = `Ziel: ${airquality.Description}`
+		document.getElementById('Aktualisierungsrate').innerText = `Aktualisierungsrate: ${airquality.UpdatedPeriod}`
+
+
+		function decodeHtmlEntities(text) {
+    const tempElement = document.createElement('textarea');
+    tempElement.innerHTML = text;
+    return tempElement.value;
+}
+
+		const forecastDiv = document.getElementById('forecasts');
+
+        airquality.currentForecast.forEach((forecast, index) => {
+            const forecastDetails = `
+                <h3>Vorhersage ${index + 1}</h3>
+                <p>Typ: ${forecast.forecastType}</p>
+                <p>Beschreibung: ${decodeHtmlEntities(forecast.Description)}</p>
+								<p>Stickstoffdioxid: ${forecast.nO2Band}</p>
+                <p>Ozon: ${forecast['Ozone concentration']}</p>
+                <p>Feinstaub (PM10): ${forecast['Particulate matter(pm10)']}</p>
+                <p>Feinstaub (PM25): ${forecast['Particulate matter(pm25)']}</p>
+                <p>Schwefeldioxid: ${forecast['Sulphur dioxide concentration']}</p>
+                <p>Zusammenfassung: ${forecast.Summary}</p>
+            `;
+            const forecastElement = document.createElement('div');
+            forecastElement.innerHTML = forecastDetails;
+            forecastDiv.appendChild(forecastElement);
+        });
+
+
+	</script>
+	
+</body>
+</html>
