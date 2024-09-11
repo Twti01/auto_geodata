@@ -1,7 +1,6 @@
 from flask import Flask, render_template
 import json, locale 
 from datetime import datetime
-import osmnx as ox
 
 app = Flask(__name__)
 

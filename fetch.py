@@ -1,5 +1,6 @@
 import json, requests
 import zipfile
+import os
 
 uri1 = "https://api.tfl.gov.uk/BikePoint/"
 uri2 = "https://api.tfl.gov.uk/AirQuality/"
@@ -34,12 +35,14 @@ try:
     with open("roads.json", "w") as f:
         json.dump(json_data3, f, indent=4)
 
-    with open("/opt/geodata/tfl-stations-data-detailed.zip", "wb") as f:
+    with open("tfl-stations-data-detailed.zip", "wb") as f:
         for chunk in data4.iter_content(chunk_size=8192):
             f.write(chunk)
 
-    with zipfile.ZipFile("/opt/geodata/tfl-stations-data-detailed.zip", "r") as zip_ref:
-        zip_ref.extractall("/opt/geodata/station_data")
+    with zipfile.ZipFile("tfl-stations-data-detailed.zip", "r") as zip_ref:
+        zip_ref.extractall("station_data")
+
+    os.remove("tfl-stations-data-detailed.zip")
 
     print("Successfully updated data")
 

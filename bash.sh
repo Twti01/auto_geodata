@@ -1,12 +1,11 @@
 #!/bin/bash
 
-
 sudo locale-gen en_US.UTF-8
 sudo update-locale
 
-python3 -m %HOME/.geo_venv
+python3 -m venv .geo_venv
 
-source ~/.geo_venv/bin/activate
+source .geo_venv/bin/activate
 
 pip install -r requirements.txt
 

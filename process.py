@@ -2,12 +2,12 @@ import pandas as pd
 import argparse 
 import numpy as np
 
-df_stations = pd.read_csv("/opt/geodata/station_data/Stations.csv")
-df_stationpoints = pd.read_csv("/opt/geodata/station_data/StationPoints.csv")
-df_toilets = pd.read_csv("/opt/geodata/station_data/Toilets.csv")
-df_ramproute = pd.read_csv("/opt/geodata/station_data/RampRoutes.csv")
-df_lift = pd.read_csv("/opt/geodata/station_data/Lifts.csv")
-df_interchange = pd.read_csv("/opt/geodata/station_data/StepFreeIntechangeInfo.csv")
+df_stations = pd.read_csv("station_data/Stations.csv")
+df_stationpoints = pd.read_csv("station_data/StationPoints.csv")
+df_toilets = pd.read_csv("station_data/Toilets.csv")
+df_ramproute = pd.read_csv("station_data/RampRoutes.csv")
+df_lift = pd.read_csv("station_data/Lifts.csv")
+df_interchange = pd.read_csv("station_data/StepFreeIntechangeInfo.csv")
 
 
 def station_info(station, wifi=False, location=True, baby_change=False, bus_interchange=False, ramp_route=False, lift=False, Interchange_info=False):
